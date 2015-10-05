@@ -133,7 +133,7 @@ resources:
       sequence: lettersdigits
 
   load_balancer1:
-    type: "Rackspace::Cloud::LoadBalancer"
+    type: "Rackspace::RackConnect::PoolNode"
     depends_on:
     - linux_server
     - linux_setup
