@@ -100,6 +100,11 @@ parameters:
     description: rackconnected network name
     type: string
 
+  rackconnect_lbpool_name_or_id:
+    label: rackconnected loadbalancer
+    description: rackconnected loadbalancer pool name or ID
+    type: string
+
 resources:
 
   ssh_key:
@@ -132,46 +137,14 @@ resources:
       length: 16
       sequence: lettersdigits
 
-  load_balancer1:
+  load_balancer:
     type: "Rackspace::RackConnect::PoolNode"
     depends_on:
     - linux_server
     - linux_setup
     properties:
-      pool: 842f579f-dd05-4299-960a-29ea70deebbf
+      pool: { get_param: rackconnect_lbpool_name_or_id }
       server_id: { get_resource: linux_server }
-
-  load_balancer:
-    type: "Rackspace::Cloud::LoadBalancer"
-    depends_on:
-    - linux_server
-    - linux_setup
-    properties:
-      name:
-        str_replace:
-          template: "lb-%server_name%"
-          params:
-            "%server_name%": { get_param: server_hostname }
-      nodes:
-      - addresses: [ { get_attr: [linux_server, networks, private, 0] } ]
-        port: 80
-        condition: ENABLED
-      healthMonitor:
-        type: HTTP
-        delay: 10
-        timeout: 5
-        attemptsBeforeDeactivation: 2
-        path: /
-        statusRegex: ^[23]0[0-2]$
-      port: 80
-      protocol: HTTP
-      algorithm: ROUND_ROBIN
-      contentCaching: ENABLED
-      virtualIps:
-      - type: PUBLIC
-        ipVersion: IPV4
-      metadata:
-        rax-heat: { get_param: "OS::stack_id" }
 
   linux_server:
     type: "OS::Nova::Server"
@@ -182,7 +155,7 @@ resources:
       key_name: { get_resource: ssh_key }
       config_drive: true
       networks:
-      - network: {get_param: rackconnect_network_name}
+      - network: { get_param: rackconnect_network_name }
       - uuid: 11111111-1111-1111-1111-111111111111
       metadata:
         rax-heat: { get_param: "OS::stack_id" }
@@ -217,11 +190,11 @@ outputs:
 
   phpmyadmin_url:
     description: phpMyAdmin URL
-    value:
-      str_replace:
-        template: "http://%server_ip%/phpmyadmin"
-        params:
-          "%server_ip%": { get_attr: [ load_balancer, PublicIp ] }
+    value: "http://your-lb-ip/phpmyadmin"
+  #    str_replace:
+  #      template: "http://%server_ip%/phpmyadmin"
+  #      params:
+  #        "%server_ip%": { get_attr: [ load_balancer, PublicIp ] }
 
   phpmyadmin_user:
     description: phpMyAdmin User
