@@ -132,7 +132,7 @@ resources:
       length: 16
       sequence: lettersdigits
 
-  load_balancer:
+  load_balancer1:
     type: "Rackspace::Cloud::LoadBalancer"
     depends_on:
     - linux_server
