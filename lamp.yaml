@@ -138,6 +138,15 @@ resources:
     - linux_server
     - linux_setup
     properties:
+      pool: 842f579f-dd05-4299-960a-29ea70deebbf
+      server_id: { get_resource: linux_server }
+
+  load_balancer:
+    type: "Rackspace::Cloud::LoadBalancer"
+    depends_on:
+    - linux_server
+    - linux_setup
+    properties:
       name:
         str_replace:
           template: "lb-%server_name%"
